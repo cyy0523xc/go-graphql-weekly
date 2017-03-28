@@ -15,9 +15,9 @@ type Task struct {
 	Remark     string     `json:"remark"`
 	Status     TaskStatus `json:"status"`
 	CreatedAt  time.Time  `json:"created_at"`  // 创建时间
-	UpdatedAt  time.Time  `json:"created_at"`  // 更新时间
-	StartAt    time.Time  `json:"created_at"`  // 开始时间
-	FinishAt   time.Time  `json:"created_at"`  // 完成时间
+	UpdatedAt  time.Time  `json:"updated_at"`  // 更新时间
+	StartAt    time.Time  `json:"start_at"`    // 开始时间
+	FinishAt   time.Time  `json:"finish_at"`   // 完成时间
 	FinishWeek int        `json:"finish_week"` // 完成的周次，例如2017年第5周完成，则对应的值为201705
 }
 
@@ -62,12 +62,12 @@ func main() {
 
 	// Display some basic instructions
 	fmt.Println("Now server is running on port 8080")
-	fmt.Println("Get task list: curl -g 'http://localhost:8080/graphql?query={taskList(status:\"todo\"){id,content,status,updated_at,start_at,finish_at}}'")
+	fmt.Println("Get task list: curl -g 'http://localhost:8080/graphql?query={taskList(status:todo){id,content,status,updated_at,start_at,finish_at}}'")
 	fmt.Println("Get done task list with week: curl -g 'http://localhost:8080/graphql?query={taskWeekList(week:201705){id,content,status,finish_at}}'")
 	fmt.Println("Create new todo: curl -g 'http://localhost:8080/graphql?query=mutation+_{createTask(content:\"My+new+todo\"){id}}'")
 	fmt.Println("Update task: curl -g 'http://localhost:8080/graphql?query=mutation+_{updateTask(id:1,content:\"my+new+content\"){id}}'")
-	fmt.Println("Update task status: curl -g 'http://localhost:8080/graphql?query=mutation+_{updateTask(id:1,status:\"doing\"){id}}'")
-	fmt.Println("delete task: curl -g 'http://localhost:8080/graphql?query={deleteTask(id:1){id}}'")
+	fmt.Println("Update task status: curl -g 'http://localhost:8080/graphql?query=mutation+_{updateTaskStatus(id:1,status:doing){id}}'")
+	fmt.Println("delete task: curl -g 'http://localhost:8080/graphql?query=mutaion+_{deleteTask(id:1){id}}'")
 
 	http.ListenAndServe(":8080", nil)
 }

@@ -14,7 +14,7 @@ var taskQueryType = graphql.NewObject(graphql.ObjectConfig{
 			Type: graphql.String,
 		},
 		"status": &graphql.Field{
-			Type: graphql.String,
+			Type: taskStatusType,
 		},
 		"updated_at": &graphql.Field{
 			Type: graphql.String,
@@ -41,11 +41,22 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Description: "获取任务列表",
 			Args: graphql.FieldConfigArgument{
 				"status": &graphql.ArgumentConfig{
-					Type: graphql.String,
+					Type:         taskStatusType,
+					DefaultValue: StatusTodo,
+					Description:  "状态，注意这里是enum类型，不要传字符串",
 				},
 			},
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return TaskList, nil
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				status := params.Args["status"].(TaskStatus)
+
+				taskList := make([]Task, 0)
+				for _, task := range TaskList {
+					if task.Status == status {
+						taskList = append(taskList, task)
+					}
+				}
+
+				return taskList, nil
 			},
 		},
 
@@ -55,11 +66,20 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Description: "获取按周汇总的任务列表（周报）",
 			Args: graphql.FieldConfigArgument{
 				"week": &graphql.ArgumentConfig{
-					Type: graphql.Int,
+					Type: graphql.NewNonNull(graphql.Int),
 				},
 			},
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return TaskList, nil
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				week := params.Args["week"].(int)
+
+				taskList := make([]Task, 0)
+				for _, task := range TaskList {
+					if task.FinishWeek == week {
+						taskList = append(taskList, task)
+					}
+				}
+
+				return taskList, nil
 			},
 		},
 	},

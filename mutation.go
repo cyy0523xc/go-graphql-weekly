@@ -1,6 +1,10 @@
 package main
 
 import (
+	"errors"
+	"fmt"
+	"time"
+
 	"github.com/graphql-go/graphql"
 )
 
@@ -41,10 +45,13 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 
 				// perform mutation operation here
 				// for e.g. create a Todo and save to DB.
+				currentTime := time.Now()
 				newTask := Task{
-					Id:      newId,
-					Content: text,
-					Status:  StatusTodo,
+					Id:        newId,
+					Content:   text,
+					CreatedAt: currentTime,
+					UpdatedAt: currentTime,
+					Status:    StatusTodo,
 				}
 
 				TaskList = append(TaskList, newTask)
@@ -68,14 +75,20 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 
 				// marshall and cast the argument value
 				text, _ := params.Args["content"].(string)
-				id, _ := params.Args["id"].(uint32)
+				_id, _ := params.Args["id"].(int)
+				id := uint32(_id)
 
 				var resTask Task
 				for index, task := range TaskList {
 					if id == task.Id {
 						resTask = task
 						TaskList[index].Content = text
+						TaskList[index].UpdatedAt = time.Now()
 					}
+				}
+
+				if resTask.Id == 0 {
+					return nil, errors.New(fmt.Sprintf("id=%d不存在", id))
 				}
 
 				return resTask, nil
@@ -90,22 +103,48 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 					Type: graphql.NewNonNull(graphql.Int),
 				},
 				"status": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.String),
+					Type: graphql.NewNonNull(taskStatusType),
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 
 				// marshall and cast the argument value
-				status, _ := params.Args["status"].(string)
-				id, _ := params.Args["id"].(uint32)
+				status, _ := params.Args["status"].(TaskStatus)
+				_id, _ := params.Args["id"].(int)
+				id := uint32(_id)
 
 				var resTask Task
 				for index, task := range TaskList {
 					if id == task.Id {
 						resTask = task
-						TaskList[index].Status = StatusDoing
-						_ = status
+						oldStatus := TaskList[index].Status
+						if oldStatus == StatusTodo {
+							if status == StatusDoing {
+								// 任务开始
+								TaskList[index].Status = status
+								TaskList[index].StartAt = time.Now()
+							} else {
+								return nil, errors.New("新状态错误")
+							}
+						} else if oldStatus == StatusDoing {
+							if status == StatusDone {
+								// 任务完成
+								currTime := time.Now()
+								TaskList[index].Status = status
+								TaskList[index].FinishAt = currTime
+								year, week := currTime.ISOWeek()
+								TaskList[index].FinishWeek = year*100 + week
+							} else {
+								return nil, errors.New("新状态错误")
+							}
+						} else {
+							return nil, errors.New("已经完成的任务不能修改状态")
+						}
 					}
+				}
+
+				if resTask.Id == 0 {
+					return nil, errors.New(fmt.Sprintf("id=%d不存在", id))
 				}
 
 				return resTask, nil
@@ -121,21 +160,33 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				n := len(TaskList)
+				if n == 0 {
+					return nil, errors.New("任务列表为空")
+				}
 
 				// marshall and cast the argument value
-				id, _ := params.Args["id"].(uint32)
+				_id, _ := params.Args["id"].(int)
+				id := uint32(_id)
 
 				var resTask Task
-				n := len(TaskList)
 				for index, task := range TaskList {
 					if id == task.Id {
 						resTask = task
-						if index < n-1 {
+						if n == 1 {
+							TaskList = TaskList[0:0]
+						} else if index < n-1 {
 							TaskList = append(TaskList[0:index-1], TaskList[index+1:n-1]...)
 						} else {
 							TaskList = TaskList[0 : index-1]
 						}
+
+						break
 					}
+				}
+
+				if resTask.Id == 0 {
+					return nil, errors.New(fmt.Sprintf("id=%d不存在", id))
 				}
 
 				return resTask, nil
