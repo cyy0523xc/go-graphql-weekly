@@ -55,19 +55,17 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 }
 
 func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(usageHelp))
+	})
+
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		result := executeQuery(r.URL.Query()["query"][0], schema)
 		json.NewEncoder(w).Encode(result)
 	})
 
-	// Display some basic instructions
 	fmt.Println("Now server is running on port 8080")
-	fmt.Println("Get task list: curl -g 'http://localhost:8080/graphql?query={taskList(status:todo){id,content,status,updated_at,start_at,finish_at}}'")
-	fmt.Println("Get done task list with week: curl -g 'http://localhost:8080/graphql?query={taskWeekList(week:201705){id,content,status,finish_at}}'")
-	fmt.Println("Create new todo: curl -g 'http://localhost:8080/graphql?query=mutation+_{createTask(content:\"My+new+todo\"){id}}'")
-	fmt.Println("Update task: curl -g 'http://localhost:8080/graphql?query=mutation+_{updateTask(id:1,content:\"my+new+content\"){id}}'")
-	fmt.Println("Update task status: curl -g 'http://localhost:8080/graphql?query=mutation+_{updateTaskStatus(id:1,status:doing){id}}'")
-	fmt.Println("delete task: curl -g 'http://localhost:8080/graphql?query=mutaion+_{deleteTask(id:1){id}}'")
+	fmt.Println(usageHelp)
 
 	http.ListenAndServe(":8080", nil)
 }

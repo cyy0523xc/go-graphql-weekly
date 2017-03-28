@@ -23,18 +23,16 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Fields: graphql.Fields{
 		"createTask": &graphql.Field{
 			Type:        mutationType,
-			Description: "创建新的todo任务",
+			Description: "创建新的任务，默认为todo状态",
 			Args: graphql.FieldConfigArgument{
 				"content": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.String),
+					Type:        graphql.NewNonNull(graphql.String),
+					Description: "任务内容",
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-				// marshall and cast the argument value
 				text, _ := params.Args["content"].(string)
 
-				// figure out new id
 				n := len(TaskList)
 				var newId uint32
 				if n == 0 {
@@ -44,7 +42,6 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 				}
 
 				// perform mutation operation here
-				// for e.g. create a Todo and save to DB.
 				currentTime := time.Now()
 				newTask := Task{
 					Id:        newId,
@@ -53,7 +50,6 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 					UpdatedAt: currentTime,
 					Status:    StatusTodo,
 				}
-
 				TaskList = append(TaskList, newTask)
 
 				return newTask, nil
@@ -62,18 +58,18 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 
 		"updateTask": &graphql.Field{
 			Type:        mutationType,
-			Description: "更新todo任务",
+			Description: "更新任务的内容",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.Int),
+					Type:        graphql.NewNonNull(graphql.Int),
+					Description: "任务ID",
 				},
 				"content": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.String),
+					Type:        graphql.NewNonNull(graphql.String),
+					Description: "任务内容",
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-				// marshall and cast the argument value
 				text, _ := params.Args["content"].(string)
 				_id, _ := params.Args["id"].(int)
 				id := uint32(_id)
@@ -100,15 +96,15 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 			Description: "更新任务的状态",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.Int),
+					Type:        graphql.NewNonNull(graphql.Int),
+					Description: "任务ID",
 				},
 				"status": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(taskStatusType),
+					Type:        graphql.NewNonNull(taskStatusType),
+					Description: "任务状态，值为：todo, doing, done",
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-
-				// marshall and cast the argument value
 				status, _ := params.Args["status"].(TaskStatus)
 				_id, _ := params.Args["id"].(int)
 				id := uint32(_id)
@@ -156,7 +152,8 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 			Description: "删除任务",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.Int),
+					Type:        graphql.NewNonNull(graphql.Int),
+					Description: "任务ID",
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
@@ -165,7 +162,6 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 					return nil, errors.New("任务列表为空")
 				}
 
-				// marshall and cast the argument value
 				_id, _ := params.Args["id"].(int)
 				id := uint32(_id)
 

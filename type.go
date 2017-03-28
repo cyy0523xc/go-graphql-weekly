@@ -5,7 +5,7 @@ import (
 )
 
 var taskStatusType = graphql.NewEnum(graphql.EnumConfig{
-	Name:        "taskStatus",
+	Name:        "TaskStatus",
 	Description: "任务状态类型",
 	Values: graphql.EnumValueConfigMap{
 		"todo": &graphql.EnumValueConfig{

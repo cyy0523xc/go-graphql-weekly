@@ -8,22 +8,28 @@ var taskQueryType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "Task",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
-			Type: graphql.Int,
+			Type:        graphql.Int,
+			Description: "任务ID",
 		},
 		"content": &graphql.Field{
-			Type: graphql.String,
+			Type:        graphql.String,
+			Description: "任务内容",
 		},
 		"status": &graphql.Field{
-			Type: taskStatusType,
+			Type:        taskStatusType,
+			Description: "任务状态",
 		},
 		"updated_at": &graphql.Field{
-			Type: graphql.String,
+			Type:        graphql.String,
+			Description: "任务最后更新时间（更新内容）",
 		},
 		"start_at": &graphql.Field{
-			Type: graphql.String,
+			Type:        graphql.String,
+			Description: "任务开始时间",
 		},
 		"finish_at": &graphql.Field{
-			Type: graphql.String,
+			Type:        graphql.String,
+			Description: "任务完成时间",
 		},
 	},
 })
@@ -66,7 +72,8 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Description: "获取按周汇总的任务列表（周报）",
 			Args: graphql.FieldConfigArgument{
 				"week": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.Int),
+					Type:        graphql.NewNonNull(graphql.Int),
+					Description: "年份周次，如2017年第5周，则值为201705",
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
