@@ -54,18 +54,27 @@ func executeQuery(query string, schema graphql.Schema) *graphql.Result {
 	return result
 }
 
+// 端口号
+var port = "8000"
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(usageHelp))
 	})
 
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		result := executeQuery(r.URL.Query()["query"][0], schema)
-		json.NewEncoder(w).Encode(result)
+		queries := r.URL.Query()
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		if len(queries) == 0 || len(queries["query"]) != 1 {
+			w.Write([]byte("error"))
+		} else {
+			result := executeQuery(r.URL.Query()["query"][0], schema)
+			json.NewEncoder(w).Encode(result)
+		}
 	})
 
-	fmt.Println("Now server is running on port 8080")
+	fmt.Println("Now server is running on port " + port)
 	fmt.Println(usageHelp)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+port, nil)
 }
