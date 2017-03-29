@@ -5,7 +5,8 @@ import (
 )
 
 var taskQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "Task",
+	Name:        "Task",
+	Description: "任务的返回结构",
 	Fields: graphql.Fields{
 		"id": &graphql.Field{
 			Type:        graphql.Int,

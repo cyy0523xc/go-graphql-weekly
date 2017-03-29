@@ -6,11 +6,15 @@ const (
 Help:
     curl -g 'http://localhost:8080/'
 
-获取Schema（其中queryType可以换成mutationType）:
+查看Schema（其中queryType可以换成mutationType）:
     curl -g 'http://localhost:8080/graphql?query={__schema{queryType{fields{name,description,type{description},args{type{name},description}}}}}'   
 
-获取Type：
+查看所有的types：
+    curl -g 'http://localhost:8080/graphql?query={__schema{types{name,description}}}'
+
+查看特定的Type：
     curl -g 'http://localhost:8080/graphql?query={__type(name:"Task"){fields{name,description,type{name,description}}}}'
+    curl -g 'http://localhost:8080/graphql?query={__type(name:"RootQuery"){fields{name,description,type{name,description}}}}'
 
 Get task list: 
     curl -g 'http://localhost:8080/graphql?query={taskList(status:todo){id,content,status,updated_at,start_at,finish_at}}'
