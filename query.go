@@ -54,16 +54,19 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 				},
 			},
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				status := params.Args["status"].(TaskStatus)
+				if params.Args["status"] != nil {
+					taskList := make([]Task, 0)
+					status := params.Args["status"].(TaskStatus)
 
-				taskList := make([]Task, 0)
-				for _, task := range TaskList {
-					if task.Status == status {
-						taskList = append(taskList, task)
+					for _, task := range TaskList {
+						if task.Status == status {
+							taskList = append(taskList, task)
+						}
 					}
+					return taskList, nil
 				}
 
-				return taskList, nil
+				return TaskList, nil
 			},
 		},
 

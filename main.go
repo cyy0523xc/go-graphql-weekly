@@ -63,18 +63,50 @@ func main() {
 	})
 
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		queries := r.URL.Query()
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		if len(queries) == 0 || len(queries["query"]) != 1 {
-			w.Write([]byte("error"))
-		} else {
-			result := executeQuery(r.URL.Query()["query"][0], schema)
-			json.NewEncoder(w).Encode(result)
-		}
+		handle("url", w, r)
+	})
+
+	http.HandleFunc("/graphql-json", func(w http.ResponseWriter, r *http.Request) {
+		handle("json", w, r)
 	})
 
 	fmt.Println("Now server is running on port " + port)
 	fmt.Println(usageHelp)
 
 	http.ListenAndServe(":"+port, nil)
+}
+
+func handle(queryType string, w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "POST,GET,OPTIONS,DELETE")
+	w.Header().Add("Access-Control-Allow-Headers", "x-requested-with,content-type")
+	if "OPTIONS" == r.Method {
+		// 解决跨域的问题
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte(""))
+	} else {
+		var queryString string
+		if queryType == "url" {
+			queryString = getQueryStringByURL(r)
+		} else {
+			queryString = getQueryStringByJson(r)
+		}
+		result := executeQuery(queryString, schema)
+		json.NewEncoder(w).Encode(result)
+	}
+}
+
+func getQueryStringByURL(r *http.Request) string {
+	return r.URL.Query()["query"][0]
+}
+
+type qstruct struct {
+	Query         string `json:"query"`
+	OperationName string `json:"operationName"`
+}
+
+func getQueryStringByJson(r *http.Request) string {
+	var q qstruct
+	_ = json.NewDecoder(r.Body).Decode(&q)
+	return q.Query
 }
