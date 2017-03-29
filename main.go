@@ -31,6 +31,13 @@ const (
 	StatusDone  TaskStatus = 2
 )
 
+// query结构
+type queryParams struct {
+	Query         string                 `json:"query"`
+	OperationName string                 `json:"operationName"`
+	Variables     map[string]interface{} `json:"variables"`
+}
+
 var TaskList []Task
 
 func init() {
@@ -43,10 +50,12 @@ var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
 	Mutation: rootMutation,
 })
 
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
+func executeQuery(params queryParams, schema graphql.Schema) *graphql.Result {
 	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
+		Schema:         schema,
+		RequestString:  params.Query,
+		VariableValues: params.Variables,
+		OperationName:  params.OperationName,
 	})
 	if len(result.Errors) > 0 {
 		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
@@ -62,10 +71,12 @@ func main() {
 		w.Write([]byte(usageHelp))
 	})
 
+	// 使用url参数来传递参数
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		handle("url", w, r)
 	})
 
+	// 使用json的格式，通过post等方式来传递参数
 	http.HandleFunc("/graphql-json", func(w http.ResponseWriter, r *http.Request) {
 		handle("json", w, r)
 	})
@@ -85,28 +96,23 @@ func handle(queryType string, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte(""))
 	} else {
-		var queryString string
+		var params queryParams
 		if queryType == "url" {
-			queryString = getQueryStringByURL(r)
+			params = getQueryStringByURL(r)
 		} else {
-			queryString = getQueryStringByJson(r)
+			params = getQueryStringByJson(r)
 		}
-		result := executeQuery(queryString, schema)
+		result := executeQuery(params, schema)
 		json.NewEncoder(w).Encode(result)
 	}
 }
 
-func getQueryStringByURL(r *http.Request) string {
-	return r.URL.Query()["query"][0]
+func getQueryStringByURL(r *http.Request) (q queryParams) {
+	q.Query = r.URL.Query()["query"][0]
+	return q
 }
 
-type qstruct struct {
-	Query         string `json:"query"`
-	OperationName string `json:"operationName"`
-}
-
-func getQueryStringByJson(r *http.Request) string {
-	var q qstruct
+func getQueryStringByJson(r *http.Request) (q queryParams) {
 	_ = json.NewDecoder(r.Body).Decode(&q)
-	return q.Query
+	return q
 }
