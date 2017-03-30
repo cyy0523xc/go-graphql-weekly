@@ -9,6 +9,9 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
+// 端口号
+const port = "8088"
+
 type Task struct {
 	Id         uint32     `json:"id"`
 	Content    string     `json:"content"`
@@ -62,9 +65,6 @@ func executeQuery(params queryParams, schema graphql.Schema) *graphql.Result {
 	}
 	return result
 }
-
-// 端口号
-var port = "8000"
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
