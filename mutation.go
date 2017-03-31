@@ -8,21 +8,12 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-var mutationType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "Mutation",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type: graphql.Int,
-		},
-	},
-})
-
 // root mutation
 var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 	Name: "RootMutation",
 	Fields: graphql.Fields{
 		"createTask": &graphql.Field{
-			Type:        mutationType,
+			Type:        taskType,
 			Description: "创建新的任务，默认为todo状态",
 			Args: graphql.FieldConfigArgument{
 				"content": &graphql.ArgumentConfig{
@@ -57,7 +48,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 		}, // end of createTask
 
 		"updateTask": &graphql.Field{
-			Type:        mutationType,
+			Type:        taskType,
 			Description: "更新任务的内容",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
@@ -92,7 +83,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 		}, // end of updateTask
 
 		"updateTaskStatus": &graphql.Field{
-			Type:        mutationType,
+			Type:        taskType,
 			Description: "更新任务的状态",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{
@@ -148,7 +139,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 		}, // end of updateTaskStatus
 
 		"deleteTask": &graphql.Field{
-			Type:        mutationType,
+			Type:        taskType,
 			Description: "删除任务",
 			Args: graphql.FieldConfigArgument{
 				"id": &graphql.ArgumentConfig{

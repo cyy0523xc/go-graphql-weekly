@@ -4,37 +4,6 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-var taskQueryType = graphql.NewObject(graphql.ObjectConfig{
-	Name:        "Task",
-	Description: "任务的返回结构",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type:        graphql.Int,
-			Description: "任务ID",
-		},
-		"content": &graphql.Field{
-			Type:        graphql.String,
-			Description: "任务内容",
-		},
-		"status": &graphql.Field{
-			Type:        taskStatusType,
-			Description: "任务状态",
-		},
-		"updated_at": &graphql.Field{
-			Type:        graphql.String,
-			Description: "任务最后更新时间（更新内容）",
-		},
-		"start_at": &graphql.Field{
-			Type:        graphql.String,
-			Description: "任务开始时间",
-		},
-		"finish_at": &graphql.Field{
-			Type:        graphql.String,
-			Description: "任务完成时间",
-		},
-	},
-})
-
 // root query
 // we just define a trivial example here, since root query is required.
 // Test with curl
@@ -44,7 +13,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 	Fields: graphql.Fields{
 		// 获取任务列表
 		"taskList": &graphql.Field{
-			Type:        graphql.NewList(taskQueryType),
+			Type:        graphql.NewList(taskType),
 			Description: "获取任务列表",
 			Args: graphql.FieldConfigArgument{
 				"status": &graphql.ArgumentConfig{
@@ -72,7 +41,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 
 		// 按周获取任务列表
 		"taskWeekList": &graphql.Field{
-			Type:        graphql.NewList(taskQueryType),
+			Type:        graphql.NewList(taskType),
 			Description: "获取按周汇总的任务列表（周报）",
 			Args: graphql.FieldConfigArgument{
 				"week": &graphql.ArgumentConfig{
