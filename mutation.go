@@ -163,9 +163,9 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 						if n == 1 {
 							TaskList = TaskList[0:0]
 						} else if index < n-1 {
-							TaskList = append(TaskList[0:index-1], TaskList[index+1:n-1]...)
+							TaskList = append(TaskList[0:index], TaskList[index+1:n-1]...)
 						} else {
-							TaskList = TaskList[0 : index-1]
+							TaskList = TaskList[0:index]
 						}
 
 						break
